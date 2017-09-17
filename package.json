@@ -1,0 +1,23 @@
+{
+  "name": "diagram-dataset-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "generate.js",
+  "scripts": {
+    "test": "ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neungkl/diagram-dataset-generator.git"
+  },
+  "author": "Kosate Limpongsa",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/neungkl/diagram-dataset-generator/issues"
+  },
+  "homepage": "https://github.com/neungkl/diagram-dataset-generator#readme",
+  "dependencies": {
+    "ava": "^0.22.0",
+    "lodash": "^4.17.4"
+  }
+}
