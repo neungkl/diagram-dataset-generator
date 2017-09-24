@@ -24,7 +24,7 @@ class GraphBuilder {
     let simpleNodes = [];
     let graph = [];
 
-    const probDesicion = 0.3;
+    const probDesicion = 0.4;
     const probBack = 0.1;
     
     const startNode = new StartNode();
@@ -54,11 +54,12 @@ class GraphBuilder {
       if (Q.length > 0) {
         const frontNode = Q[0];
         if (frontNode instanceof SimpleNode) {
-          if (random.rand() > probBack || simpleNodes.length == 0) {
+          if (random.rand() > probBack || simpleNodes.length <= 1) {
             frontNode.setNext(node);
-          } else {
+          } else if (Q.length > 1) {
             shouldAdd = false;
-            frontNode.setNext(simpleNodes[random.randInt(simpleNodes.length)])
+            frontNode.setNext(simpleNodes[random.randInt(simpleNodes.length - 1)]);
+            Q.shift();
           }
         } else if (frontNode instanceof DecisionNode) {
           if (random.rand() > 0.5 || frontNode.hasRight()) {

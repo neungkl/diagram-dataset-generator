@@ -1,5 +1,8 @@
-class DecisionNode {
+const Node = require('./node')
+
+class DecisionNode extends Node {
   constructor(opts) {
+    super();
     if (typeof opts === 'string') {
       this.label = opts;
     } else if (typeof opts === 'object') {

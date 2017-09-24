@@ -1,5 +1,8 @@
-class SimpleNode {
+const Node = require('./node')
+
+class SimpleNode extends Node {
   constructor(opts) {
+    super(opts);
     if (typeof opts === 'string') {
       this.label = opts;
     } else if (typeof opts === 'object') {
