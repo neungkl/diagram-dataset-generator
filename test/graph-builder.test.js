@@ -4,7 +4,7 @@ import GraphBuilder from '../builder/graph-builder';
 test(t => {
   const g = new GraphBuilder();
 
-  g.build();
+  console.log(g.buildRandom(20));
 
   t.pass();
 })

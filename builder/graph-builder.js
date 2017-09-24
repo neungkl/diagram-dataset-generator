@@ -1,6 +1,9 @@
-const Node = require('./node');
 const random = require('../utils/random');
 const AlphabetCounter = require('../utils/alphabet-counter');
+const DecisionNode = require('./decision-node');
+const SimpleNode = require('./simple-node');
+const StartNode = require('./start-node');
+const EndNode = require('./end-node');
 const _ = require('lodash');
 
 class GraphBuilder {
@@ -8,43 +11,92 @@ class GraphBuilder {
 
   }
 
-  build(minNode = 4, maxNode = 6) {
-    maxNode = Math.max(minNode, maxNode);
-    minNode = Math.min(minNode, maxNode);
-
-    const nodeNum = random.randRange(minNode, maxNode);
-    const alphabetCounter = new AlphabetCounter();
-    let nodes = [];
-    for(let i = 0; i < nodeNum; i++) {
-      nodes.push(new Node(alphabetCounter.next()));
+  createRandomNode(prob = 0.5) {
+    if (random.rand() > prob) {
+      return new SimpleNode();
+    } else {
+      return new DecisionNode();
     }
-    nodes = _.shuffle(nodes);
+  }
 
-    let edgePair = [];
-    for (let i = 0; i < nodeNum; i++) {
-      for (let j = i + 1; j < nodeNum; j++) {
-        edgePair.push([i,j]);
-      }
-    }
-    edgePair = _.shuffle(edgePair);
+  buildRandom(iterate = 8) {
+    let Q = [];
+    let simpleNodes = [];
+    let graph = [];
 
-    const useEdge = random.randPositive(edgePair.length);
+    const probDesicion = 0.3;
+    const probBack = 0.1;
     
-    for (let i = 0; i < edgePair.length; i++) {
-      let s = edgePair[i][0]
-      let e = edgePair[i][1];
-      if (i < useEdge || !nodes[s].hasChild()) {
-        let direction = random.randInt(2);
-        if (direction == 0 || nodes[s].hasRight()) {
-          nodes[s].setLeft(nodes[e]);
-        } else {
-          nodes[s].setRight(nodes[e]);
+    const startNode = new StartNode();
+    Q.push(startNode);
+    graph.push(startNode);
+
+    for (let i = 0; i < iterate; i++) {
+      while (true && Q.length > 0) {
+        const frontNode = Q[0];
+        if (frontNode instanceof SimpleNode) {
+          if (frontNode.hasNext()) {
+            Q.shift();
+            continue;
+          }
+        } else if (frontNode instanceof DecisionNode) {
+          if (frontNode.hasBothChild()) {
+            Q.shift();
+            continue;
+          }
+        }
+        break;
+      }
+
+      const node = this.createRandomNode(probDesicion);
+      let shouldAdd = true;
+
+      if (Q.length > 0) {
+        const frontNode = Q[0];
+        if (frontNode instanceof SimpleNode) {
+          if (random.rand() > probBack || simpleNodes.length == 0) {
+            frontNode.setNext(node);
+          } else {
+            shouldAdd = false;
+            frontNode.setNext(simpleNodes[random.randInt(simpleNodes.length)])
+          }
+        } else if (frontNode instanceof DecisionNode) {
+          if (random.rand() > 0.5 || frontNode.hasRight()) {
+            frontNode.setLeft(node);
+          } else {
+            frontNode.setRight(node);
+          }
         }
       }
+
+      if (shouldAdd) {
+        Q.push(node);
+        if (node instanceof SimpleNode) {
+          simpleNodes.push(node)
+        }
+        graph.push(node);
+      }
     }
 
-    console.log(nodes);
-    return nodes;
+    const endNode = new EndNode();
+    while(Q.length > 0) {
+      const frontNode = Q[0];
+      if (frontNode instanceof SimpleNode) {
+        if (!frontNode.hasNext()) {
+          frontNode.setNext(endNode);
+        }
+      } else if(frontNode instanceof DecisionNode) {
+        if (!frontNode.hasLeft()) {
+          frontNode.setLeft(endNode);
+        } else if(!frontNode.hasRight()) {
+          frontNode.setRight(endNode);
+        }
+      }
+      Q.shift();
+    }
+    graph.push(endNode);
+
+    return graph;
   }
 }
 
