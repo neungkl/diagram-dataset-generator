@@ -4,6 +4,7 @@
   "description": "",
   "main": "generate.js",
   "scripts": {
+    "run": "node ./test/run",
     "test": "ava"
   },
   "repository": {

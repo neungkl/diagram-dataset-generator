@@ -1,8 +1,8 @@
 const AlphabetCounter = require("../utils/alphabet-counter");
-const StartNode = require('../builder/start-node');
-const EndNode = require('../builder/end-node');
-const SimpleNode = require('../builder/simple-node');
-const DecisionNode = require('../builder/decision-node');
+const StartNode = require('../graph/start-node');
+const EndNode = require('../graph/end-node');
+const SimpleNode = require('../graph/simple-node');
+const DecisionNode = require('../graph/decision-node');
 const random = require('../utils/random');
 
 class GraphToFlow {
@@ -22,7 +22,7 @@ class GraphToFlow {
       } else if (i === graph.length - 1) {
         label = "end"
       } else {
-        label = ahbCounter.next();
+        label = graph[i].label || ahbCounter.next();
       }
 
       const g = graph[i];
