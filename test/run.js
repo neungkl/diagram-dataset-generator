@@ -6,12 +6,12 @@ const LangHelper = require('../lang/lang-helper');
 const l = new LangGenerator();
 const g = new GraphBuilder();
 
-lang = l.generate(20, 3);
+lang = l.generate(30, 3);
 
 // const gg = g.build(lang);
-const gg = g._transformToScope(lang);
+const gg = g.build(lang);
 LangHelper.print(lang);
-console.log(require('util').inspect(gg, false, 10));
+// console.log(require('util').inspect(gg, false, 10));
 // const flow = GraphToFlow.convert(gg);
 
 // LangHelper.print(lang);

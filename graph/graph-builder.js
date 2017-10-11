@@ -97,81 +97,158 @@ class GraphBuilder {
   build(tokens) {
     LangHelper.validate(tokens);
 
-    let graph = [];
-    let scopeStack = [];
-    let scopeStackType = [];
-    let requireLinkIf = false;
-    let requireLinkLoop = false;
-    let lastLoopNode;
+    let nodeId = 1;
 
-    const connectToUnconnect = function(node) {
-      for (let i = 0; i < graph.length; i++) {
-        if (graph[i] instanceof SimpleNode) {
-          if (!graph[i].hasNext()) {
-            graph[i].setNext(node);
-          }
+    const stampInfo = function (scope) {
+      if (_.isArray(scope)) {
+        let node = [];
+        for (let i = 0; i < scope.length; i++) {
+          node.push(stampInfo(scope[i]));
         }
+        if (node[0].type === 'else') {
+          node[0].id = node[1].id; 
+        }
+        return node;
+      } else if (scope instanceof Token) {
+        if (scope.type === 'normal') {
+          return { type: 'normal', id: nodeId++, next: null };
+        } else if (scope.type === 'else') {
+          return { type: 'else', next: null };
+        } else if (scope.type !== 'end') {
+          return { type: scope.type, id: nodeId++, next: null, alt: null };
+        }
+      } else {
+        return { type: 'none' };
       }
     }
+
+    const getHead = function (head) {
+      if (_.isArray(head)) {
+        return getHead(head[0]);
+      } else {
+        return head;
+      }
+    }
+
+    const assignLastNext = function (last, id) {
+      if (_.isObject(last)) {
+        if (_.isNull(last.next)) last.next = id;
+      } else if (_.isArray(last)) {
+        for (let i = 0; i < last.length; i++) {
+          assignLastNext(last[i], id);
+        }
+      } else {
+        throw new Error(`Bad behavior #02`);
+      }
+    }
+
+    const connectNode = function (nodes) {
+      if (_.isArray(nodes)) {
+        for (let i = 0; i < nodes.length; i++) {
+          connectNode(nodes[i]);
+        }
+        if (_.isArray(nodes[0]) && nodes[0][0].type === 'if') {
+          for (let i = 0; i < nodes.length - 1; i++) {
+            nodes[i][0].alt = nodes[i + 1][0].id;
+          }
+        } else {
+          for (let i = 0; i < nodes.length - 1; i++) {
+            if (!_.isArray(nodes[i])) {
+              if (_.isNull(nodes[i].next)) {
+                nodes[i].next = getHead(nodes[i + 1]).id;
+              } else {
+                throw new Error(`Bad behavior #01`);
+              }
+            }
+          }
+          
+          // if (_.isObject(nodes[0]) && _.includes(['while', 'for'], nodes[0].type)) {
+          //   assignLastNext(_.last(nodes), nodes[0].id);
+          // }
+        }
+        
+      }
+    }
+ 
+    const scope = this._transformToScope(tokens);
+    const scopeInfo = stampInfo(scope);
+    scopeInfo.push({ type: 'end', id: nodeId++ });
+    let graph = [];
+
+    connectNode(scopeInfo);
+
+    console.log(require('util').inspect(scopeInfo, false, 10));
+
+    // const connectToUnconnect = function(node) {
+    //   for (let i = 0; i < graph.length; i++) {
+    //     if (graph[i] instanceof SimpleNode) {
+    //       if (!graph[i].hasNext()) {
+    //         graph[i].setNext(node);
+    //       }
+    //     }
+    //   }
+    // }
 
     graph.push(new StartNode());
 
-    for (let i = 0; i < tokens.length; i++) {
-      const token = tokens[i];
 
-      if (token.type === 'end') {
-        if (_.last(scopeStackType) === 'if') {
-          requireLinkIf = true;
-        } else {
-          requireLinkLoop = true;
-          lastLoopNode = _.last(scopeStack);
-        }
-        scopeStack.pop();
-        scopeStackType.pop();
-      } else {
 
-        if (requireLinkLoop) {
-          connectToUnconnect(lastLoopNode);
-          requireLinkLoop = false;
-          requireLinkIf = false;
-        }
+    // for (let i = 0; i < tokens.length; i++) {
+    //   const token = tokens[i];
 
-        let node;
+    //   if (token.type === 'end') {
+    //     if (_.last(scopeStackType) === 'if') {
+    //       requireLinkIf = true;
+    //     } else {
+    //       requireLinkLoop = true;
+    //       lastLoopNode = _.last(scopeStack);
+    //     }
+    //     scopeStack.pop();
+    //     scopeStackType.pop();
+    //   } else {
 
-        if (token.type === 'normal') {
-          node = new SimpleNode(token.info);
-        } else if (_.includes(['for', 'while'], token.type)) {
-          node = new DecisionNode(token.info);
-          scopeStack.push(node);
-          scopeStackType.push('loop');
-        } else {
-          node = new DecisionNode(token.info);
+    //     if (requireLinkLoop) {
+    //       connectToUnconnect(lastLoopNode);
+    //       requireLinkLoop = false;
+    //       requireLinkIf = false;
+    //     }
 
-          if (requireLinkIf) {
-            connectToUnconnect(node);
-            requireLinkIf = false;
-          }
+    //     let node;
 
-          scopeStack.push(node);
-          scopeStackType.push('if');
-        }
+    //     if (token.type === 'normal') {
+    //       node = new SimpleNode(token.info);
+    //     } else if (_.includes(['for', 'while'], token.type)) {
+    //       node = new DecisionNode(token.info);
+    //       scopeStack.push(node);
+    //       scopeStackType.push('loop');
+    //     } else {
+    //       node = new DecisionNode(token.info);
 
-        if (i > 0) {
-          const lastNode = _.last(graph);
-          if (lastNode instanceof DecisionNode) {
-            lastNode.setRight(node);
-          } else {
-            lastNode.setNext(node);
-          }
-        }
+    //       if (requireLinkIf) {
+    //         connectToUnconnect(node);
+    //         requireLinkIf = false;
+    //       }
 
-        graph.push(node);
-      }
-    }
+    //       scopeStack.push(node);
+    //       scopeStackType.push('if');
+    //     }
 
-    const node = new EndNode();
-    connectToUnconnect(node);
-    graph.push(node);
+    //     if (i > 0) {
+    //       const lastNode = _.last(graph);
+    //       if (lastNode instanceof DecisionNode) {
+    //         lastNode.setRight(node);
+    //       } else {
+    //         lastNode.setNext(node);
+    //       }
+    //     }
+
+    //     graph.push(node);
+    //   }
+    // }
+
+    // const node = new EndNode();
+    // connectToUnconnect(node);
+    // graph.push(node);
 
     return graph;
   }
