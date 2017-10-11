@@ -11,7 +11,7 @@ lang = l.generate(20, 3);
 // const gg = g.build(lang);
 const gg = g._transformToScope(lang);
 LangHelper.print(lang);
-console.log(gg);
+console.log(require('util').inspect(gg, false, 10));
 // const flow = GraphToFlow.convert(gg);
 
 // LangHelper.print(lang);

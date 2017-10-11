@@ -21,7 +21,7 @@ class GraphBuilder {
     }
   }
 
-  _transformToScope(tokens) {
+  _transformToScope(tokens, isSubtoken = false) {
     let scope = [];
     const type = tokens[0].type;
 
@@ -39,45 +39,55 @@ class GraphBuilder {
       return subtokens;
     }
 
-    if (type === 'if') {
-      let subscope = [];
+    if (isSubtoken) {
+      if (type === 'if') {
+        let subscope = [];
+        let deep = 0;
+        
+        for (let i = 0; i < tokens.length; i++) {
+          const token = tokens[i];
 
-      tokens.pop();
+          if (_.includes(['for', 'while', 'if'], token.type)) deep++;
+          else if (token.type === 'end') deep--;
+          
+          if (_.includes(['if', 'elseif', 'else'], token.type) && deep === 1) {
+            if (subscope.length) {
+              const front = subscope[0];
+              subscope.shift();
+              scope.push(
+                _.concat(front, this._transformToScope(subscope))
+              );
+            }
+            subscope = [token];
+          } else {
+            subscope.push(token);
+          }
+        }
+        if (subscope.length) {
+          const front = subscope[0];
+          subscope.shift();
+          subscope.pop();
+          scope.push(
+            _.concat(front, this._transformToScope(subscope))
+          );
+        }
+  
+        return scope;
+      } else {
+        const front = tokens.shift();
+        const end = tokens.pop();
+        return _.concat(front, this._transformToScope(tokens));
+      }
+    } else {
       for (let i = 0; i < tokens.length; i++) {
         const token = tokens[i];
         if (token.type === 'normal') {
-          subscope.push(token);
-        } else if(_.includes(['if', 'elseif', 'else'], token.type)) {
-          if (subscope.length) {
-            scope.push(subscope);
-          }
-          subscope = [token];
+          scope.push(token);
         } else {
           const subtokens = getSubtokens(i);
           i += subtokens.length - 1;
-          // subscope.push(this._transformToScope(subtokens));
+          scope.push(this._transformToScope(subtokens, true));
         }
-      }
-      if (subscope.length) {
-        scope.push(subscope);
-      }
-
-      return scope;
-
-    } else if (type !== 'normal') {
-      scope.push(tokens[0]);
-      tokens.shift();
-      tokens.pop();
-    }
-
-    for (let i = 0; i < tokens.length; i++) {
-      const token = tokens[i];
-      if (token.type === 'normal') {
-        scope.push(token);
-      } else {
-        const subtokens = getSubtokens(i);
-        i += subtokens.length - 1;
-        // scope.push(this._transformToScope(subtokens));
       }
     }
 
