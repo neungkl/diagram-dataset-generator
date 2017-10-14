@@ -25,7 +25,7 @@ class GraphBuilder {
     let scope = [];
     const type = tokens[0].type;
 
-    const getSubtokens = function(i) {
+    const getSubtokens = function (i) {
       let subtokens = [tokens[i]];
       let deep = 1;
       for (let j = i + 1; j < tokens.length; j++) {
@@ -43,13 +43,13 @@ class GraphBuilder {
       if (type === 'if') {
         let subscope = [];
         let deep = 0;
-        
+
         for (let i = 0; i < tokens.length; i++) {
           const token = tokens[i];
 
           if (_.includes(['for', 'while', 'if'], token.type)) deep++;
           else if (token.type === 'end') deep--;
-          
+
           if (_.includes(['if', 'elseif', 'else'], token.type) && deep === 1) {
             if (subscope.length) {
               const front = subscope[0];
@@ -71,7 +71,7 @@ class GraphBuilder {
             _.concat(front, this._transformToScope(subscope))
           );
         }
-  
+
         return scope;
       } else {
         const front = tokens.shift();
@@ -94,31 +94,45 @@ class GraphBuilder {
     return scope;
   }
 
-  build(tokens) {
-    LangHelper.validate(tokens);
-
+  _convertToScopeBlock(tokens) {
     let nodeId = 1;
 
-    const stampInfo = function (scope) {
+    const stampBlockScope = function (scope) {
       if (_.isArray(scope)) {
         let node = [];
         for (let i = 0; i < scope.length; i++) {
-          node.push(stampInfo(scope[i]));
+          node.push(stampBlockScope(scope[i]));
         }
         if (node[0].type === 'else') {
-          node[0].id = node[1].id; 
+          node[0].id = node[1].id;
         }
         return node;
       } else if (scope instanceof Token) {
         if (scope.type === 'normal') {
-          return { type: 'normal', id: nodeId++, next: null };
+          return {
+            type: 'normal',
+            id: nodeId++,
+            next: null,
+            info: scope.info
+          };
         } else if (scope.type === 'else') {
-          return { type: 'else', next: null };
+          return {
+            type: 'else',
+            next: null
+          };
         } else if (scope.type !== 'end') {
-          return { type: scope.type, id: nodeId++, next: null, alt: null };
+          return {
+            type: scope.type,
+            id: nodeId++,
+            next: null,
+            alt: null,
+            info: scope.info
+          };
         }
       } else {
-        return { type: 'none' };
+        return {
+          type: 'none'
+        };
       }
     }
 
@@ -130,22 +144,34 @@ class GraphBuilder {
       }
     }
 
-    const assignLastNext = function (last, id) {
-      if (_.isObject(last)) {
-        if (_.isNull(last.next)) last.next = id;
-      } else if (_.isArray(last)) {
-        for (let i = 0; i < last.length; i++) {
-          assignLastNext(last[i], id);
+    const assignChildNextNull = function (child, id) {
+      if (_.isArray(child)) {
+        for (let i = 0; i < child.length; i++) {
+          assignChildNextNull(child[i], id);
         }
+      } else if (_.isObject(child)) {
+        if (_.isNull(child.next)) child.next = id;
       } else {
         throw new Error(`Bad behavior #02`);
       }
     }
 
-    const connectNode = function (nodes) {
+    const assignChildAltNull = function (child, id) {
+      if (_.isArray(child)) {
+        for (let i = 0; i < child.length; i++) {
+          assignChildAltNull(child[i], id);
+        }
+      } else if (_.isObject(child)) {
+        if (_.isNull(child.alt)) child.alt = id;
+      } else {
+        throw new Error(`Bad behavior #03`);
+      }
+    }
+
+    const connectNode = function (nodes, nodesAdjust = null) {
       if (_.isArray(nodes)) {
         for (let i = 0; i < nodes.length; i++) {
-          connectNode(nodes[i]);
+          connectNode(nodes[i], (i < nodes.length - 1 ? nodes[i + 1] : null));
         }
         if (_.isArray(nodes[0]) && nodes[0][0].type === 'if') {
           for (let i = 0; i < nodes.length - 1; i++) {
@@ -161,94 +187,85 @@ class GraphBuilder {
               }
             }
           }
-          
-          // if (_.isObject(nodes[0]) && _.includes(['while', 'for'], nodes[0].type)) {
-          //   assignLastNext(_.last(nodes), nodes[0].id);
-          // }
         }
-        
+
+        if (_.isObject(nodes[0]) && _.includes(['while', 'for'], nodes[0].type)) {
+          assignChildNextNull(nodes, nodes[0].id);
+          assignChildAltNull(nodes.slice(1), nodes[0].id);
+        } else if (_.isArray(nodes[0]) && nodes[0][0].type === 'if') {
+          if (!_.isNull(nodesAdjust))
+            assignChildNextNull(nodes, getHead(nodesAdjust).id);
+        }
+        if (!_.isNull(nodesAdjust)) {
+          assignChildAltNull(nodes, getHead(nodesAdjust).id);
+        }
       }
     }
- 
+
     const scope = this._transformToScope(tokens);
-    const scopeInfo = stampInfo(scope);
-    scopeInfo.push({ type: 'end', id: nodeId++ });
+    const scopeBlock = stampBlockScope(scope);
+    scopeBlock.push({
+      type: 'end',
+      id: nodeId++
+    });
+
+    connectNode(scopeBlock);
+
+    return scopeBlock;
+  }
+
+  build(tokens) {
+    LangHelper.validate(tokens);
+
     let graph = [];
+    const scopeBlock = this._convertToScopeBlock(tokens);
 
-    connectNode(scopeInfo);
-
-    console.log(require('util').inspect(scopeInfo, false, 10));
-
-    // const connectToUnconnect = function(node) {
-    //   for (let i = 0; i < graph.length; i++) {
-    //     if (graph[i] instanceof SimpleNode) {
-    //       if (!graph[i].hasNext()) {
-    //         graph[i].setNext(node);
-    //       }
-    //     }
-    //   }
-    // }
+    // console.log(require('util').inspect(scopeBlock, false, 10));
 
     graph.push(new StartNode());
 
+    let flattenScopeBlock = [];
 
+    const flatten = function (block) {
+      if (_.isArray(block)) {
+        for (let i = 0; i < block.length; i++)
+          flatten(block[i]);
+      } else if (_.isObject(block)) {
+        flattenScopeBlock[block.id] = block;
+      } else {
+        throw new Error(`Bad Behavior #4`);
+      }
+    }
 
-    // for (let i = 0; i < tokens.length; i++) {
-    //   const token = tokens[i];
+    flatten(scopeBlock);
+    
+    for (let i = 1; i < flattenScopeBlock.length; i++) {
+      const block = flattenScopeBlock[i];
+      const info = block.info;
+      if (block.type === 'normal') {
+        graph[i] = new SimpleNode(info);
+      } else if (block.type === 'for') {
+        graph[i] = new DecisionNode(`${info.i} = ${info.start} to ${info.end}`);
+      } else if (block.type === 'end') {
+        graph[i] = new EndNode();
+      } else {
+        graph[i] = new DecisionNode(info);
+      }
+    }
 
-    //   if (token.type === 'end') {
-    //     if (_.last(scopeStackType) === 'if') {
-    //       requireLinkIf = true;
-    //     } else {
-    //       requireLinkLoop = true;
-    //       lastLoopNode = _.last(scopeStack);
-    //     }
-    //     scopeStack.pop();
-    //     scopeStackType.pop();
-    //   } else {
+    // Connect each component
 
-    //     if (requireLinkLoop) {
-    //       connectToUnconnect(lastLoopNode);
-    //       requireLinkLoop = false;
-    //       requireLinkIf = false;
-    //     }
+    graph[0].setNext(graph[1]);
+    for (let i = 1; i < flattenScopeBlock.length - 1; i++) {
+      const block = flattenScopeBlock[i];
 
-    //     let node;
-
-    //     if (token.type === 'normal') {
-    //       node = new SimpleNode(token.info);
-    //     } else if (_.includes(['for', 'while'], token.type)) {
-    //       node = new DecisionNode(token.info);
-    //       scopeStack.push(node);
-    //       scopeStackType.push('loop');
-    //     } else {
-    //       node = new DecisionNode(token.info);
-
-    //       if (requireLinkIf) {
-    //         connectToUnconnect(node);
-    //         requireLinkIf = false;
-    //       }
-
-    //       scopeStack.push(node);
-    //       scopeStackType.push('if');
-    //     }
-
-    //     if (i > 0) {
-    //       const lastNode = _.last(graph);
-    //       if (lastNode instanceof DecisionNode) {
-    //         lastNode.setRight(node);
-    //       } else {
-    //         lastNode.setNext(node);
-    //       }
-    //     }
-
-    //     graph.push(node);
-    //   }
-    // }
-
-    // const node = new EndNode();
-    // connectToUnconnect(node);
-    // graph.push(node);
+      if (graph[i] instanceof SimpleNode) {
+        graph[i].setNext(graph[block.next]);
+      } else if (graph[i] instanceof DecisionNode) {
+        graph[i].setLeft(graph[block.next]);
+        graph[i].setRight(graph[block.alt]);
+      }
+    }
 
     return graph;
   }
@@ -260,7 +277,7 @@ class GraphBuilder {
 
     const probDesicion = 0.4;
     const probBack = 0.1;
-    
+
     const startNode = new StartNode();
     Q.push(startNode);
     graph.push(startNode);
@@ -292,7 +309,8 @@ class GraphBuilder {
             frontNode.setNext(node);
           } else if (Q.length > 1) {
             shouldAdd = false;
-            frontNode.setNext(simpleNodes[random.randInt(simpleNodes.length - 1)]);
+            frontNode.setNext(simpleNodes[random.randInt(simpleNodes.length -
+              1)]);
             Q.shift();
           }
         } else if (frontNode instanceof DecisionNode) {
@@ -314,16 +332,16 @@ class GraphBuilder {
     }
 
     const endNode = new EndNode();
-    while(Q.length > 0) {
+    while (Q.length > 0) {
       const frontNode = Q[0];
       if (frontNode instanceof SimpleNode) {
         if (!frontNode.hasNext()) {
           frontNode.setNext(endNode);
         }
-      } else if(frontNode instanceof DecisionNode) {
+      } else if (frontNode instanceof DecisionNode) {
         if (!frontNode.hasLeft()) {
           frontNode.setLeft(endNode);
-        } else if(!frontNode.hasRight()) {
+        } else if (!frontNode.hasRight()) {
           frontNode.setRight(endNode);
         }
       }

@@ -6,14 +6,14 @@ const LangHelper = require('../lang/lang-helper');
 const l = new LangGenerator();
 const g = new GraphBuilder();
 
-lang = l.generate(30, 3);
+lang = l.generate(15, 3);
 
 // const gg = g.build(lang);
 const gg = g.build(lang);
 LangHelper.print(lang);
-// console.log(require('util').inspect(gg, false, 10));
-// const flow = GraphToFlow.convert(gg);
+console.log(require('util').inspect(gg, false, 1));
+const flow = GraphToFlow.convert(gg);
 
 // LangHelper.print(lang);
-// console.log(flow);
+console.log(flow);
 

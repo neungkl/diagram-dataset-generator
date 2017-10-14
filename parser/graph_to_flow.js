@@ -10,9 +10,11 @@ class GraphToFlow {
     this.alphabetCounter = new AlphabetCounter()
   }
   convert(graph) {
-    const ahbCounter = this.alphabetCounter;
+    // const ahbCounter = this.alphabetCounter;
     let text = [];
-    ahbCounter.reset();
+    let decisionNodeCount = 1;
+    let statementNodeCount = 1;
+    // ahbCounter.reset();
 
     for (let i = 0; i < graph.length; i++) {
       let label = "";
@@ -22,21 +24,28 @@ class GraphToFlow {
       } else if (i === graph.length - 1) {
         label = "end"
       } else {
-        label = graph[i].label || ahbCounter.next();
+        if (graph[i] instanceof SimpleNode) {
+          label = 'st' + statementNodeCount++;
+        } else {
+          label = 'dcs' + decisionNodeCount++;
+        }
+        // label = ahbCounter.next();
       }
 
       const g = graph[i];
-      g.setLabel(label);
+      const blockDesciption = graph[i].label || label;
 
       if (g instanceof StartNode) {
         text.push(`st=>start: ${label}`);
       } else if (g instanceof EndNode) {
         text.push(`end=>end: ${label}`);
       } else if (g instanceof SimpleNode) {
-        text.push(`${label}=>operation: ${label}`);
+        text.push(`${label}=>operation: ${blockDesciption}`);
       } else if (g instanceof DecisionNode) {
-        text.push(`${label}=>condition: ${label}`);
+        text.push(`${label}=>condition: ${blockDesciption}`);
       }
+
+      g.setLabel(label);
     }
 
     text.push(`st->${graph[0].next.label}`)
@@ -49,15 +58,11 @@ class GraphToFlow {
           text.push(`${g.label}->${g.next.label}`);
         }
       } else if (g instanceof DecisionNode) {
-        let direction = ["right", "left"];
-        if (random.rand() > 0.5) {
-          direction = ["left", "right"];
-        }
         if (g.hasLeft()) {
-          text.push(`${g.label}(yes, ${direction[0]})->${g.left.label}`);
+          text.push(`${g.label}(yes)->${g.left.label}`);
         }
         if (g.hasRight()) {
-          text.push(`${g.label}(no, ${direction[1]})->${g.right.label}`);
+          text.push(`${g.label}(no)->${g.right.label}`);
         }
       }
     }
