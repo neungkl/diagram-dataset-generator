@@ -17,6 +17,10 @@ class GraphToFlow {
     // ahbCounter.reset();
 
     for (let i = 0; i < graph.length; i++) {
+      graph[i]._id = i;
+    }
+
+    for (let i = 0; i < graph.length; i++) {
       let label = "";
 
       if (i === 0) {
@@ -55,7 +59,8 @@ class GraphToFlow {
 
       if (g instanceof SimpleNode) {
         if (g.hasNext()) {
-          text.push(`${g.label}->${g.next.label}`);
+          if (g._id < g.next._id) text.push(`${g.label}->${g.next.label}`);
+          else text.push(`${g.label}(left)->${g.next.label}`)
         }
       } else if (g instanceof DecisionNode) {
         if (g.hasLeft()) {

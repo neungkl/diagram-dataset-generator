@@ -19,7 +19,7 @@
   "homepage": "https://github.com/neungkl/diagram-dataset-generator#readme",
   "dependencies": {
     "ava": "^0.22.0",
-    "flowchart.js": "^1.7.0",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "puppeteer": "^0.12.0"
   }
 }
