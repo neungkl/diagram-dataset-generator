@@ -6,7 +6,7 @@ class FlowToImage {
 
   toImage(flowLang) {
     
-    puppeteer.launch({ headless: false }).then(async browser => {
+    puppeteer.launch({ headless: true }).then(async browser => {
       const page = await browser.newPage();
       page.on('error', msg => {
         console.log(error)
@@ -23,7 +23,7 @@ class FlowToImage {
       const diagramElm = await page.$('#diagram');
       const html = await page.evaluate(body => body.innerHTML, diagramElm);
 
-      await diagramElm.screenshot({ path: 'selementHandlecreenshot.png', fullPage: false })
+      await diagramElm.screenshot({ path: 'data/sample.png', fullPage: false })
       await diagramElm.dispose();
       await browser.close();
     });
