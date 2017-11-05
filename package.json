@@ -4,7 +4,7 @@
   "description": "",
   "main": "generate.js",
   "scripts": {
-    "gen": "node ./test/run",
+    "generate": "node ./test/generate",
     "test": "ava"
   },
   "repository": {
@@ -20,6 +20,7 @@
   "dependencies": {
     "ava": "^0.22.0",
     "lodash": "^4.17.4",
-    "puppeteer": "^0.12.0"
+    "puppeteer": "^0.12.0",
+    "svg2png": "^4.1.1"
   }
 }

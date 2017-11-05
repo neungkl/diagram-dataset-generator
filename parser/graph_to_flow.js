@@ -4,13 +4,15 @@ const EndNode = require('../graph/end-node');
 const SimpleNode = require('../graph/simple-node');
 const DecisionNode = require('../graph/decision-node');
 const random = require('../utils/random');
+const _ = require('lodash');
 
 class GraphToFlow {
   constructor() {
     this.alphabetCounter = new AlphabetCounter()
   }
-  convert(graph) {
+  convert(inputGraph) {
     // const ahbCounter = this.alphabetCounter;
+    const graph = _.cloneDeep(inputGraph);
     let text = [];
     let decisionNodeCount = 1;
     let statementNodeCount = 1;
@@ -56,15 +58,32 @@ class GraphToFlow {
 
     for (let i = 1; i < graph.length - 1; i++) {
       const g = graph[i];
+      let hasDrawn = false;
 
       if (g instanceof SimpleNode) {
-        if (g.hasNext()) {
+        if (i < graph.length - 2) {
+          if (graph[i - 1] instanceof DecisionNode && graph[i + 1] instanceof DecisionNode) {
+            text.push(`${g.label}(right)->${g.next.label}`);
+            hasDrawn = true;
+          }
+        }
+        if (!hasDrawn && g.hasNext()) {
           if (g._id < g.next._id) text.push(`${g.label}->${g.next.label}`);
-          else text.push(`${g.label}(left)->${g.next.label}`)
+          else {
+            if (random.rand() > 1) {
+              text.push(`${g.label}(left)->${g.next.label}`);
+            } else {
+              text.push(`${g.label}(right)->${g.next.label}`);
+            }
+          }
         }
       } else if (g instanceof DecisionNode) {
         if (g.hasLeft()) {
-          text.push(`${g.label}(yes)->${g.left.label}`);
+          if (random.rand() > 0.5) {
+            text.push(`${g.label}(yes, right)->${g.left.label}`);
+          } else {
+            text.push(`${g.label}(yes, bottom)->${g.left.label}`);
+          }
         }
         if (g.hasRight()) {
           text.push(`${g.label}(no)->${g.right.label}`);

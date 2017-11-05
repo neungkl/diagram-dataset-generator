@@ -22,7 +22,7 @@ const validate = function(tokens) {
   }
 }
 
-const print = function(words) {
+const parse = function(words) {
   validate(words);
 
   let curSpaceSize = 0;
@@ -56,10 +56,10 @@ const print = function(words) {
     txt += '\n';
   }
 
-  console.log(txt);
+  return txt;
 }
 
 module.exports = {
-  print,
+  parse,
   validate
 }
