@@ -12,7 +12,7 @@ const graphBuilder = new GraphBuilder();
 const flowLang = [];
 
 for (let i = 0; i < 10; i++) {
-  const codeLong = random.randRange(12,22);
+  const codeLong = random.randRange(8,15);
   const codeDepth = random.randRange(3,5);
   const lang = langGenerator.generate(codeLong, codeDepth);
   const graph = graphBuilder.build(lang);

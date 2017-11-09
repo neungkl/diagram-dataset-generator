@@ -68,9 +68,14 @@ class GraphToFlow {
           }
         }
         if (!hasDrawn && g.hasNext()) {
-          if (g._id < g.next._id) text.push(`${g.label}->${g.next.label}`);
-          else {
-            if (random.rand() > 1) {
+          if (g._id < g.next._id) {
+            if (random.rand() > 0.75) {
+              text.push(`${g.label}->${g.next.label}`);
+            } else {
+              text.push(`${g.label}(right)->${g.next.label}`);
+            }
+          } else {
+            if (random.rand() > 0.5) {
               text.push(`${g.label}(left)->${g.next.label}`);
             } else {
               text.push(`${g.label}(right)->${g.next.label}`);
@@ -79,7 +84,7 @@ class GraphToFlow {
         }
       } else if (g instanceof DecisionNode) {
         if (g.hasLeft()) {
-          if (random.rand() > 0.5) {
+          if (random.rand() > 1) {
             text.push(`${g.label}(yes, right)->${g.left.label}`);
           } else {
             text.push(`${g.label}(yes, bottom)->${g.left.label}`);
