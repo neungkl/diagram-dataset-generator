@@ -5,13 +5,13 @@ class FlowToImage {
   constructor() {
   }
 
-  toImage(flowLang, writeFlow = false) {
+  async toImage(flowLang, writeFlow = false) {
 
     if (typeof flowLang === 'string') {
       flowLang = [flowLang];
     }
 
-    puppeteer.launch({ headless: true }).then(async browser => {
+    await puppeteer.launch({ headless: true }).then(async browser => {
 
       function generateBuilder(flowLang, current, size, page) {
         return new Promise(async (resolve, reject) => {
