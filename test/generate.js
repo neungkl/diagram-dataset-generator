@@ -11,12 +11,12 @@ const graphBuilder = new GraphBuilder();
 
 const flowLang = [];
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 5; i++) {
   const codeLong = random.randRange(8,15);
   const codeDepth = random.randRange(3,5);
   const lang = langGenerator.generate(codeLong, codeDepth);
   const graph = graphBuilder.build(lang);
-  for(let j = 0; j < 3; j++) {
+  for(let j = 0; j < 4; j++) {
     const flow = GraphToFlow.convert(graph);
     flowLang.push({
       index: (i + 1) + '-' + (j + 1),

@@ -14,12 +14,16 @@ class GraphToFlow {
     // const ahbCounter = this.alphabetCounter;
     const graph = _.cloneDeep(inputGraph);
     let text = [];
+    let hasLeft = [];
+    let everFill = [];
     let decisionNodeCount = 1;
     let statementNodeCount = 1;
     // ahbCounter.reset();
 
     for (let i = 0; i < graph.length; i++) {
       graph[i]._id = i;
+      hasLeft.push(false);
+      everFill.push(false);
     }
 
     for (let i = 0; i < graph.length; i++) {
@@ -54,46 +58,80 @@ class GraphToFlow {
       g.setLabel(label);
     }
 
-    text.push(`st->${graph[0].next.label}`)
+    text.push(`st->${graph[0].next.label}`);
 
-    for (let i = 1; i < graph.length - 1; i++) {
-      const g = graph[i];
-      let hasDrawn = false;
+    // Random variables
+    const graphFlowRightProb = random.rand() * 0.6 + 0.3;
+    let fillN = graph.length - 2;
 
-      if (g instanceof SimpleNode) {
-        if (i < graph.length - 2) {
-          if (graph[i - 1] instanceof DecisionNode && graph[i + 1] instanceof DecisionNode) {
-            text.push(`${g.label}(right)->${g.next.label}`);
-            hasDrawn = true;
-          }
-        }
-        if (!hasDrawn && g.hasNext()) {
-          if (g._id < g.next._id) {
-            if (random.rand() > 0.75) {
-              text.push(`${g.label}->${g.next.label}`);
-            } else {
+    while (fillN > 0) {
+      let i = 1;
+      for (; i < graph.length - 1; i++) {
+        if (!everFill[i]) break;
+      }
+
+      let shouldContinueFillSubGraph = true;
+      while (shouldContinueFillSubGraph) {
+
+        shouldContinueFillSubGraph = false;
+        everFill[i] = true;
+        fillN--;
+
+        const g = graph[i];
+        let hasDrawn = false;
+  
+        if (g instanceof SimpleNode) {
+          if (i < graph.length - 2) {
+            if (graph[i - 1] instanceof DecisionNode && graph[i + 1] instanceof DecisionNode) {
               text.push(`${g.label}(right)->${g.next.label}`);
+              hasDrawn = true;
+              hasLeft[g.next._id] = true;
             }
-          } else {
-            if (random.rand() > 0.5) {
-              text.push(`${g.label}(left)->${g.next.label}`);
+          }
+          if (!hasDrawn && g.hasNext()) {
+            if (g._id < g.next._id) {
+              if (random.rand() > graphFlowRightProb) {
+                text.push(`${g.label}->${g.next.label}`);
+              } else {
+                text.push(`${g.label}(right)->${g.next.label}`);
+                hasLeft[g.next._id] = true;
+              }
             } else {
-              text.push(`${g.label}(right)->${g.next.label}`);
+              if (!hasLeft[g._id] && random.rand() > 0.5) {
+                text.push(`${g.label}(left)->${g.next.label}`);
+              } else {
+                text.push(`${g.label}(right)->${g.next.label}`);
+                hasLeft[g.next._id] = true;
+              }
             }
           }
-        }
-      } else if (g instanceof DecisionNode) {
-        if (g.hasLeft()) {
-          if (random.rand() > 1) {
-            text.push(`${g.label}(yes, right)->${g.left.label}`);
-          } else {
-            text.push(`${g.label}(yes, bottom)->${g.left.label}`);
+        } else if (g instanceof DecisionNode) {
+          if (g.hasLeft()) {
+            let canYesOnRight = true;
+            if (g.right._id < g._id) canYesOnRight = false;
+            if (canYesOnRight && random.rand() > 0.5) {
+              text.push(`${g.label}(yes, right)->${g.left.label}`);
+              hasLeft[g.left._id] = true;
+
+              i = g.right._id;
+              shouldContinueFillSubGraph = true;
+            } else {
+              text.push(`${g.label}(yes, bottom)->${g.left.label}`);
+              hasLeft[g.right._id] = true;
+
+              i =  g.left._id;
+              shouldContinueFillSubGraph = true;
+            }
           }
-        }
-        if (g.hasRight()) {
-          text.push(`${g.label}(no)->${g.right.label}`);
+          if (g.hasRight()) {
+            text.push(`${g.label}(no)->${g.right.label}`);
+          }
         }
       }
+    }
+    
+    for (let i = 1; i < graph.length - 1; i++) {
+      
     }
 
     return text.join("\n");
