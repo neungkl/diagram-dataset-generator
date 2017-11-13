@@ -79,7 +79,7 @@ class FlowToImage {
         });
         page.setViewport({ width: 1280, height: 800 });
 
-        await page.goto(`file://${__dirname}/render_flow.html`);
+        await page.goto(`file://${__dirname}/render-flow.html`);
         await page.waitForSelector('#finish');
 
         pagePool.push(page);

@@ -5,7 +5,7 @@
   "main": "generate.js",
   "scripts": {
     "generate": "node ./test/generate",
-    "test": "ava"
+    "test": "node ./test/test"
   },
   "repository": {
     "type": "git",

@@ -3,14 +3,13 @@ const random = require('../utils/random');
 const _ = require('lodash');
 
 class LangGenerator {
-  constructor() {
-
-  }
+  constructor() {}
 
   generate(iterate = 16, deep = 2) {
     let words = [];
     let statementCnt = 1;
     let conditionCnt = 1;
+    let loopCnt = 1;
     let scopeStack = [];
     let nextIsStatement = false;
 
@@ -67,7 +66,8 @@ class LangGenerator {
           }
 
           if (random.rand() > 0.3) {
-            words.push(new Token('for', {i: 'i', start: 1, end: 20}));
+            // words.push(new Token('for', {i: 'i', start: 1, end: 20}));
+            words.push(new Token('for', 'loop' + loopCnt++));
           } else {
             words.push(new Token('while', 'condition' + conditionCnt++));
           }

@@ -1,8 +1,8 @@
 const GraphBuilder =  require('../graph/graph-builder');
-const GraphToFlow = require('../parser/graph_to_flow');
+const GraphToFlow = require('../parser/graph-to-flow');
 const LangGenerator = require('../lang/lang-generator');
 const LangHelper = require('../lang/lang-helper');
-const FlowToImage = require('../parser/flow_to_image');
+const FlowToImage = require('../parser/flow-to-image');
 const random = require('../utils/random');
 const fs = require('fs');
 

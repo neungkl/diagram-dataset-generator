@@ -245,7 +245,11 @@ class GraphBuilder {
       if (block.type === 'normal') {
         graph[i] = new SimpleNode(info);
       } else if (block.type === 'for') {
-        graph[i] = new DecisionNode(`${info.i} = ${info.start} to ${info.end}`);
+        if (typeof info === 'string') {
+          graph[i] = new DecisionNode(`${info}`);
+        } else {
+          graph[i] = new DecisionNode(`${info.i} = ${info.start} to ${info.end}`); 
+        }
       } else if (block.type === 'end') {
         graph[i] = new EndNode();
       } else {
