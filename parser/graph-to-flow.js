@@ -62,7 +62,7 @@ class GraphToFlow {
 
     // Random variables
     const graphFlowRightProb = random.rand() * 0.6 + 0.3;
-    let fillN = graph.length - 2;
+    let fillN = graph.length - 1;
 
     while (fillN > 0) {
       let i = 1;
