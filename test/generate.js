@@ -26,10 +26,10 @@ async function generateSample() {
           index: sampleID + '-' + (j + 1),
           lang: flow
         });
-        fs.writeFile(__dirname + `/../data/sample-${sampleID}-${j + 1}-flow.txt`, flow);
+        fs.writeFile(__dirname + `/../data/sample-${sampleID}-${j + 1}-flow.txt`, flow, () => { });
       }
 
-      fs.writeFile(__dirname + `/../data/sample-${sampleID}-lang.txt`, LangHelper.parse(lang));
+      fs.writeFile(__dirname + `/../data/sample-${sampleID}-lang.txt`, LangHelper.parse(lang), () => { });
       sampleID++;
     }
     
