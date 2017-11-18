@@ -34,9 +34,6 @@ class FlowToImage {
             elm.innerHTML = "";
             var diagram = flowchart.parse(lang);
             diagram.drawSVG('diagram');
-  
-            // const { x, y, width, height } = elm.getBoundingClientRect();
-            // return { left: x, top: y, width, height, id: elm.id };
           }, lang);
   
           if (writeFlow) {
@@ -50,16 +47,6 @@ class FlowToImage {
           let picDir = __dirname + `/../data/sample-${current+1}.jpg`;
           if (index) picDir = __dirname + `/../data/sample-${index}.jpg`;
       
-          const padding = 5;
-          // await page.screenshot({
-          //   path: picDir,
-          //   clip: {
-          //     x: rect.left - padding,
-          //     y: rect.top - padding,
-          //     width: rect.width + padding * 2,
-          //     height: rect.height + padding * 2,
-          //   },
-          // });
           await diagramElm.screenshot({ path: picDir, fullPage: false, type: 'jpeg' });
   
           await diagramElm.dispose();
