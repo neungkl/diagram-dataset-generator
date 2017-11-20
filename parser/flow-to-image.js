@@ -1,11 +1,12 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const svgValidator = require('../validator/svg-validator');
 
 class FlowToImage {
   constructor() {
   }
 
-  async toImage(flowLang, writeFlow = false) {
+  async toImage(flowLang, writeFlow = false, threadSize = 16) {
 
     if (typeof flowLang === 'string') {
       flowLang = [flowLang];
@@ -36,14 +37,18 @@ class FlowToImage {
             diagram.drawSVG('diagram');
           }, lang);
   
+          const svgTag = await page.evaluate(body => body.innerHTML, diagramElm);
+          
+          if (svgValidator.validate(svgTag)) {
+            
+          }
+
           if (writeFlow) {
             let flowDir = __dirname + `/../data/sample-${current+1}-flow.txt`;
             if (index) flowDir = __dirname + `/../data/sample-${index}-flow.txt`;
-            await fs.writeFileSync(flowDir, lang);
+            fs.writeFile(flowDir, lang, () => { });
           }
-  
-          // const html = await page.evaluate(body => body.innerHTML, diagramElm);
-  
+          
           let picDir = __dirname + `/../data/sample-${current+1}.jpg`;
           if (index) picDir = __dirname + `/../data/sample-${index}.jpg`;
       
@@ -57,7 +62,6 @@ class FlowToImage {
 
       let builderPool = [];
       let pagePool = [];
-      const threadSize = 8;
 
       for (let j = 0; j < threadSize; j++) {
         const page = await browser.newPage();

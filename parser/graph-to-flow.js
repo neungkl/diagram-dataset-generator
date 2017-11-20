@@ -97,7 +97,7 @@ class GraphToFlow {
                 hasLeft[g.next._id] = true;
               }
             } else {
-              if (!hasLeft[g._id] && random.rand() > 0.5) {
+              if (!hasLeft[g._id] && random.rand() > graphFlowRightProb) {
                 text.push(`${g.label}(left)->${g.next.label}`);
               } else {
                 text.push(`${g.label}(right)->${g.next.label}`);
@@ -109,7 +109,7 @@ class GraphToFlow {
           if (g.hasLeft()) {
             let canYesOnRight = true;
             if (g.right._id < g._id) canYesOnRight = false;
-            if (canYesOnRight && random.rand() > 0.5) {
+            if (canYesOnRight && random.rand() > graphFlowRightProb) {
               text.push(`${g.label}(yes, right)->${g.left.label}`);
               hasLeft[g.left._id] = true;
 
