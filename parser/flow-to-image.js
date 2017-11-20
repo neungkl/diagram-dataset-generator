@@ -40,6 +40,12 @@ class FlowToImage {
           const svgTag = await page.evaluate(body => body.innerHTML, diagramElm);
           
           if (svgValidator.validate(svgTag)) {
+            if (writeFlow) {
+              let flowDir = __dirname + `/../data/sample-${current+1}-flow-hide.txt`;
+              if (index) flowDir = __dirname + `/../data/sample-${index}-flow-hide.txt`;
+              fs.writeFile(flowDir, lang, () => { });
+            }
+
             return resolve('reject');  
           }
 

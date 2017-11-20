@@ -115,10 +115,18 @@ class SVGChecker {
     return [boxObjs, lineObjs];
   }
 
-  checkCollision(boxs = [], lines = [], padding = 5) {
+  checkCollision(boxs = [], lines = [], padding = 2) {
     for (let i = 0; i < boxs.length; i++) {
       for (let j = 0; j < lines.length; j++) {
         if (boxs[i].collideWith(lines[j], padding)) {
+          return true;
+        }
+      }
+    }
+    for (let i = 0; i < lines.length; i++) {
+      for (let j = 0; j < lines.length; j++) {
+        if (i == j) continue;
+        if (lines[i].collideWithLine(lines[j])) {
           return true;
         }
       }
@@ -128,7 +136,7 @@ class SVGChecker {
 
   validate(svgText) {
     const [boxs, lines] = this.transformSvgToObjectList(svgText);
-    console.log(this.checkCollision(boxs, lines));
+    return this.checkCollision(boxs, lines);
   }
 }
 

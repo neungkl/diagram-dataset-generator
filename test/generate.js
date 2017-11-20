@@ -16,12 +16,12 @@ async function generateSample() {
     const flowLang = [];
 
     console.log(`Sample at: ${sampleID}`);
-    for (let i = 0; i < 10; i++) {
-      const codeLong = random.randRange(8,15);
-      const codeDepth = random.randRange(3,5);
+    for (let i = 0; i < 5; i++) {
+      const codeLong = random.randRange(5,15);
+      const codeDepth = random.randRange(2,5);
       const lang = langGenerator.generate(codeLong, codeDepth);
       const graph = graphBuilder.build(lang);
-      for(let j = 0; j < 1; j++) {
+      for(let j = 0; j < 20; j++) {
         const flow = GraphToFlow.convert(graph);
         flowLang.push({
           index: sampleID + '-' + (j + 1),
@@ -37,7 +37,7 @@ async function generateSample() {
   }
 }
 
-async function generateSample2() {
+async function generateSingleSample() {
   
   const flow =
 `st=>start: start
