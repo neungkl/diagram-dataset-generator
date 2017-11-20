@@ -88,7 +88,7 @@ class SVGChecker {
       if (element.is('path')) {
         const d = element.attr('d');
         const [width, height] = this.getBoundaryFromPath(d);
-        boxObjs.push(new Box(x, y, width, height));
+        boxObjs.push(new Box(x, y, width, height, 'diamond'));
       } else {
         const width = +element.attr('width');
         const height = +element.attr('height');
@@ -115,18 +115,23 @@ class SVGChecker {
     return [boxObjs, lineObjs];
   }
 
-  checkCollision(boxs = [], lines = [], padding = 2) {
+  checkCollision(boxs = [], lines = []) {
     for (let i = 0; i < boxs.length; i++) {
       for (let j = 0; j < lines.length; j++) {
-        if (boxs[i].collideWith(lines[j], padding)) {
+        if (boxs[i].collideWith(lines[j], 1)) {
           return true;
+        }
+        if (boxs[i].type === 'rect') {
+          if (boxs[i].isNear(lines[j], 2)) {
+            return true;
+          }
         }
       }
     }
     for (let i = 0; i < lines.length; i++) {
       for (let j = 0; j < lines.length; j++) {
         if (i == j) continue;
-        if (lines[i].collideWithLine(lines[j])) {
+        if (lines[i].collideWithLine(lines[j], 1, 7)) {
           return true;
         }
       }
