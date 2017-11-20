@@ -40,7 +40,7 @@ class FlowToImage {
           const svgTag = await page.evaluate(body => body.innerHTML, diagramElm);
           
           if (svgValidator.validate(svgTag)) {
-            
+            return resolve('reject');  
           }
 
           if (writeFlow) {

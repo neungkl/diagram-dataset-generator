@@ -11,31 +11,31 @@ const langGenerator = new LangGenerator();
 const graphBuilder = new GraphBuilder();
 
 let sampleID = 1; 
-// async function generateSample() {
-//   while(sampleID <= 1) {
-//     const flowLang = [];
+async function generateSample() {
+  while(sampleID <= 10) {
+    const flowLang = [];
 
-//     console.log(`Sample at: ${sampleID}`);
-//     for (let i = 0; i < 1; i++) {
-//       const codeLong = random.randRange(8,15);
-//       const codeDepth = random.randRange(3,5);
-//       const lang = langGenerator.generate(codeLong, codeDepth);
-//       const graph = graphBuilder.build(lang);
-//       for(let j = 0; j < 1; j++) {
-//         const flow = GraphToFlow.convert(graph);
-//         flowLang.push({
-//           index: sampleID + '-' + (j + 1),
-//           lang: flow
-//         });
-//       }
+    console.log(`Sample at: ${sampleID}`);
+    for (let i = 0; i < 10; i++) {
+      const codeLong = random.randRange(8,15);
+      const codeDepth = random.randRange(3,5);
+      const lang = langGenerator.generate(codeLong, codeDepth);
+      const graph = graphBuilder.build(lang);
+      for(let j = 0; j < 1; j++) {
+        const flow = GraphToFlow.convert(graph);
+        flowLang.push({
+          index: sampleID + '-' + (j + 1),
+          lang: flow
+        });
+      }
 
-//       fs.writeFile(__dirname + `/../data/sample-${sampleID}-lang.txt`, LangHelper.parse(lang), () => { });
-//       sampleID++;
-//     }
+      fs.writeFile(__dirname + `/../data/sample-${sampleID}-lang.txt`, LangHelper.parse(lang), () => { });
+      sampleID++;
+    }
     
-//     await FlowToImage.toImage(flowLang, writeFlow = true);
-//   }
-// }
+    await FlowToImage.toImage(flowLang, writeFlow = true);
+  }
+}
 
 async function generateSample2() {
   
@@ -86,4 +86,4 @@ st9->end`;
   await FlowToImage.toImage(flowLang, writeFlow = true);
 }
 
-generateSample2();
+generateSample();
