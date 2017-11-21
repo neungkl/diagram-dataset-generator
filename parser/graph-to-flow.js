@@ -1,16 +1,17 @@
+const _ = require('lodash');
+
 const AlphabetCounter = require("../utils/alphabet-counter");
 const StartNode = require('../graph/start-node');
 const EndNode = require('../graph/end-node');
 const SimpleNode = require('../graph/simple-node');
 const DecisionNode = require('../graph/decision-node');
 const random = require('../utils/random');
-const _ = require('lodash');
 
 class GraphToFlow {
   constructor() {
     this.alphabetCounter = new AlphabetCounter()
   }
-  convert(inputGraph) {
+  convert(inputGraph, randomLabel = false) {
     // const ahbCounter = this.alphabetCounter;
     const graph = _.cloneDeep(inputGraph);
     let text = [];
@@ -41,7 +42,10 @@ class GraphToFlow {
       }
 
       const g = graph[i];
-      const blockDesciption = graph[i].label || label;
+      let blockDesciption = graph[i].label || label;
+      if (randomLabel) {
+        blockDesciption = random.randWord(random.randRange(5, 12));
+      }
 
       if (g instanceof StartNode) {
         text.push(`st=>start: ${label}`);

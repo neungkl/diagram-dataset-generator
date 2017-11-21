@@ -117,20 +117,31 @@ class SVGChecker {
 
   checkCollision(boxs = [], lines = []) {
     for (let i = 0; i < boxs.length; i++) {
+      for (let j = 0; j < i; j++) {
+        if (boxs[i].collideWith(boxs[j], 0));
+      }
+    }
+
+    for (let i = 0; i < boxs.length; i++) {
       for (let j = 0; j < lines.length; j++) {
-        if (boxs[i].collideWith(lines[j], 1)) {
-          return true;
-        }
         if (boxs[i].type === 'rect') {
-          if (boxs[i].isNear(lines[j], 2)) {
+          // rect shape
+          if (boxs[i].collideWith(lines[j], 1)) {
+            return true;
+          }
+          if (boxs[i].isNear(lines[j], 4)) {
+            return true;
+          }
+        } else {
+          // diamond shape
+          if (boxs[i].collideWith(lines[j], 10)) {
             return true;
           }
         }
       }
     }
     for (let i = 0; i < lines.length; i++) {
-      for (let j = 0; j < lines.length; j++) {
-        if (i == j) continue;
+      for (let j = 0; j < i; j++) {
         if (lines[i].collideWithLine(lines[j], 1, 7)) {
           return true;
         }

@@ -40,7 +40,11 @@ const parse = function(words) {
     if (word.type === 'normal') {
       txt += word.info;
     } else if (word.type === 'for') {
-      txt += `for ${word.info.i} in ${word.info.start}...${word.info.end}`;
+      if (typeof word.info === 'string') {
+        txt += `for ${word.info}`;
+      } else {
+        txt += `for ${word.info.i} in ${word.info.start}...${word.info.end}`;
+      }  
     } else if (_.includes(['end', 'else'], word.type)) {
       txt += word.type;
     } else {

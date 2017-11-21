@@ -1,3 +1,5 @@
+const generateID = require('nanoid/generate');
+
 // randInt [0...n)
 const randInt = function(n) {
   return Math.floor(Math.random() * n);
@@ -17,9 +19,17 @@ const rand = function() {
   return Math.random();
 }
 
+const randWord = function (length) {
+  return generateID(
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    length
+  );
+}
+
 module.exports = {
   randInt,
   randRange,
   randPositive,
-  rand
+  rand,
+  randWord
 }

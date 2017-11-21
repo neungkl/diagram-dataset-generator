@@ -17,12 +17,13 @@ async function generateSample() {
 
     console.log(`Sample at: ${sampleID}`);
     for (let i = 0; i < 5; i++) {
-      const codeLong = random.randRange(5,15);
+      const codeLong = random.randRange(5,11);
       const codeDepth = random.randRange(2,5);
       const lang = langGenerator.generate(codeLong, codeDepth);
       const graph = graphBuilder.build(lang);
+
       for(let j = 0; j < 20; j++) {
-        const flow = GraphToFlow.convert(graph);
+        const flow = GraphToFlow.convert(graph, true);
         flowLang.push({
           index: sampleID + '-' + (j + 1),
           lang: flow

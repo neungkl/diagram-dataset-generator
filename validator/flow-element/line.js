@@ -33,6 +33,14 @@ class Line {
         if (dist > min && dist < max) return true;
       }
     }
+
+    if (
+      Math.abs(line.x1 - this.x1) < eps &&
+      Math.abs(line.x2 - this.x2) < eps &&
+      Math.abs(line.y1 - this.y1) < eps &&
+      Math.abs(line.y2 - this.y2) < eps
+    ) return true;
+
     return false;
   }
 }

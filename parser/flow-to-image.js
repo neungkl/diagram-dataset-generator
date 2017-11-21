@@ -46,6 +46,7 @@ class FlowToImage {
               fs.writeFile(flowDir, lang, () => { });
             }
 
+            await diagramElm.dispose();
             return resolve('reject');  
           }
 
@@ -59,7 +60,6 @@ class FlowToImage {
           if (index) picDir = __dirname + `/../data/sample-${index}.jpg`;
       
           await diagramElm.screenshot({ path: picDir, fullPage: false, type: 'jpeg' });
-  
           await diagramElm.dispose();
 
           resolve('pass');
