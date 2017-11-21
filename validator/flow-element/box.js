@@ -31,7 +31,7 @@ class Box {
     return false;
   }
 
-  collideWithBox(box, pad) {
+  collideWithBox(box) {
     let sw = this.x;
     let ew = this.x + this.width;
     let sh = this.y;
@@ -46,16 +46,6 @@ class Box {
       return true;
     }
     return false;  
-  }
-
-  collideWith(obj, pad) {
-    if (typeof pad !== 'number') throw new Error('Please specific pad number');
-
-    if (obj instanceof Line) {
-      return this.collideWithLine(obj, pad);
-    } else {
-      return this.collideWithBox(obj);
-    }
   }
 
   isNear(line, pad) {

@@ -17,7 +17,7 @@ async function generateSample() {
 
     console.log(`Sample at: ${sampleID}`);
     for (let i = 0; i < 5; i++) {
-      const codeLong = random.randRange(5,11);
+      const codeLong = random.randRange(5,10);
       const codeDepth = random.randRange(2,5);
       const lang = langGenerator.generate(codeLong, codeDepth);
       const graph = graphBuilder.build(lang);
@@ -42,38 +42,25 @@ async function generateSingleSample() {
   
   const flow =
 `st=>start: start
-dcs1=>condition: condition1
-st1=>operation: statement1
-st2=>operation: statement2
-st3=>operation: statement3
-st4=>operation: statement4
-st5=>operation: statement5
-st6=>operation: statement6
-dcs2=>condition: condition2
-st7=>operation: statement7
-dcs3=>condition: condition3
-st8=>operation: statement8
-dcs4=>condition: condition4
-st9=>operation: statement9
+dcs1=>condition: QasiCksHknCz
+st1=>operation: dSmJIPimnr
+st2=>operation: Vutyv
+dcs2=>condition: DfvjQmnit
+st3=>operation: puNjZTGxh
+dcs3=>condition: cHlNBIVZaE
+st4=>operation: rcjLayGSMU
 end=>end: end
-st->dcs1
+st(right)->dcs1
 dcs1(yes, bottom)->st1
-dcs1(no)->st4
-st1(right)->st2
-st2(right)->st3
-st3->st4
-st4(right)->st5
-st5(right)->st6
-st6(right)->dcs2
-dcs2(yes, bottom)->st7
+dcs1(no)->end
+st1->st2
+st2->dcs2
+dcs2(yes, bottom)->st3
 dcs2(no)->dcs3
-st7(right)->end
-dcs3(yes, bottom)->st8
-dcs3(no)->dcs4
-st8(right)->end
-dcs4(yes, bottom)->st9
-dcs4(no)->end
-st9->end`;
+st3(left)->dcs2
+dcs3(yes, bottom)->st4
+dcs3(no)->dcs1
+st4(left)->dcs1`;
 
   const flowLang = [];
 

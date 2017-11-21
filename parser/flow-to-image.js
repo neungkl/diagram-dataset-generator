@@ -46,6 +46,11 @@ class FlowToImage {
               fs.writeFile(flowDir, lang, () => { });
             }
 
+            // let picDir = __dirname + `/../data/sample-${current+1}-hide.jpg`;
+            // if (index) picDir = __dirname + `/../data/sample-${index}-hide.jpg`;
+        
+            // await diagramElm.screenshot({ path: picDir, fullPage: false, type: 'jpeg' });
+
             await diagramElm.dispose();
             return resolve('reject');  
           }

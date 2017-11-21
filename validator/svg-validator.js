@@ -6,15 +6,15 @@ class SVGChecker {
   constructor() { }
 
   convertMatrixToXY(matrixStr) {
-    const re = /^matrix\(\d+\.?\d*,\d+\.?\d*,\d+\.?\d*,\d+\.?\d*,(\d+\.?\d*),(\d+\.?\d*)\)$/;
+    const re = /^matrix\(\-?\d+\.?\d*,\-?\d+\.?\d*,\-?\d+\.?\d*,\-?\d+\.?\d*,(\-?\d+\.?\d*),(\-?\d+\.?\d*)\)$/;
     const found = matrixStr.match(re);
 
     return [+found[1], +found[2]];
   }
 
   getBoundaryFromPath(path) {
-    const re = /((M|L)(\d*\.?\d*),(\d+\.?\d*))|(C((\d*\.?\d*),){4}(\d*\.?\d*),(\d+\.?\d*))/g;
-    const reCmd = /^.(\d*\.?\d*),(\d+\.?\d*)$/;
+    const re = /((M|L)(\-?\d+\.?\d*),(\-?\d+\.?\d*))|(C((\-?\d+\.?\d*),){4}(\-?\d+\.?\d*),(\-?\d+\.?\d*))/g;
+    const reCmd = /^.(\-?\d+\.?\d*),(\-?\d+\.?\d*)$/;
     const pathExtract = path.match(re);
 
     let width = 0;
@@ -35,9 +35,9 @@ class SVGChecker {
   }
 
   getLineSequence(path) {
-    const re = /((M|L)(\d*\.?\d*),(\d+\.?\d*))|(C((\d*\.?\d*),){4}(\d*\.?\d*),(\d+\.?\d*))/g;
-    const reCmdFirst = /^.(\d*\.?\d*),(\d+\.?\d*)$/;
-    const reCmd = /^.((\d*\.?\d*),){4}(\d*\.?\d*),(\d+\.?\d*)$/;
+    const re = /((M|L)(\-?\d+\.?\d*),(\-?\d+\.?\d*))|(C((\-?\d+\.?\d*),){4}(\-?\d+\.?\d*),(\-?\d+\.?\d*))/g;
+    const reCmdFirst = /^.(\-?\d+\.?\d*),(\-?\d+\.?\d*)$/;
+    const reCmd = /^.((\-?\d+\.?\d*),){4}(\-?\d+\.?\d*),(\-?\d+\.?\d*)$/;
     
     const pathExtract = path.match(re);
     const lineSeq = [];
@@ -118,7 +118,7 @@ class SVGChecker {
   checkCollision(boxs = [], lines = []) {
     for (let i = 0; i < boxs.length; i++) {
       for (let j = 0; j < i; j++) {
-        if (boxs[i].collideWith(boxs[j], 0));
+        if (boxs[i].collideWithBox(boxs[j])) return true;
       }
     }
 
@@ -126,27 +126,21 @@ class SVGChecker {
       for (let j = 0; j < lines.length; j++) {
         if (boxs[i].type === 'rect') {
           // rect shape
-          if (boxs[i].collideWith(lines[j], 1)) {
-            return true;
-          }
-          if (boxs[i].isNear(lines[j], 4)) {
-            return true;
-          }
+          if (boxs[i].collideWithLine(lines[j], 1)) return true;
+          if (boxs[i].isNear(lines[j], 7)) return true;
         } else {
           // diamond shape
-          if (boxs[i].collideWith(lines[j], 10)) {
-            return true;
-          }
+          if (boxs[i].collideWithLine(lines[j], 10)) return true;
         }
       }
     }
+
     for (let i = 0; i < lines.length; i++) {
       for (let j = 0; j < i; j++) {
-        if (lines[i].collideWithLine(lines[j], 1, 7)) {
-          return true;
-        }
+        if (lines[i].collideWithLine(lines[j], 1, 10)) return true;
       }
     }
+
     return false;
   }
 
