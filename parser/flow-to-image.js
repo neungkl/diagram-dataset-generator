@@ -39,17 +39,15 @@ class FlowToImage {
   
           const svgTag = await page.evaluate(body => body.innerHTML, diagramElm);
           
-          if (svgValidator.validate(svgTag)) {
-            if (writeFlow) {
-              let flowDir = __dirname + `/../data/sample-${current+1}-flow-hide.txt`;
-              if (index) flowDir = __dirname + `/../data/sample-${index}-flow-hide.txt`;
-              fs.writeFile(flowDir, lang, () => { });
-            }
+          if (!svgValidator.validate(svgTag)) {
+            // if (writeFlow) {
+            //   let flowDir = __dirname + `/../data/sample-${current+1}-flow-hide.txt`;
+            //   if (index) flowDir = __dirname + `/../data/sample-${index}-flow-hide.txt`;
+            //   fs.writeFile(flowDir, lang, () => { });
+            // }
 
             // let picDir = __dirname + `/../data/sample-${current+1}-hide.jpg`;
             // if (index) picDir = __dirname + `/../data/sample-${index}-hide.jpg`;
-        
-            // await diagramElm.screenshot({ path: picDir, fullPage: false, type: 'jpeg' });
 
             await diagramElm.dispose();
             return resolve('reject');  

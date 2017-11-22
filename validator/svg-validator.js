@@ -146,7 +146,7 @@ class SVGChecker {
 
   validate(svgText) {
     const [boxs, lines] = this.transformSvgToObjectList(svgText);
-    return this.checkCollision(boxs, lines);
+    return !this.checkCollision(boxs, lines);
   }
 }
 
