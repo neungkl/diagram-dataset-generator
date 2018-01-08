@@ -34,7 +34,11 @@ class FlowToImage {
             var elm = document.querySelector('#diagram');
             elm.innerHTML = "";
             var diagram = flowchart.parse(lang);
-            diagram.drawSVG('diagram');
+            diagram.drawSVG('diagram', {
+              flowstate: {
+                blank: { 'font-color': 'white' }
+              }
+            });
           }, lang);
   
           const svgTag = await page.evaluate(body => body.innerHTML, diagramElm);
@@ -89,7 +93,7 @@ class FlowToImage {
         for (let j = 0; j < threadSize; j++) {
           if (i + j < flowLang.length) {
             builderPool.push(generateBuilder(
-              flowLang[i + j], 
+              flowLang[i + j],
               i + j,
               flowLang.length,
               pagePool[j]

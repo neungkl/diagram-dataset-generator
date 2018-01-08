@@ -4,8 +4,8 @@
   "description": "",
   "main": "generate.js",
   "scripts": {
-    "generate": "node ./test/generate",
-    "test": "node ./test/test"
+    "generate": "node ./run/generate",
+    "test": "ava"
   },
   "repository": {
     "type": "git",

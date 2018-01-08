@@ -1,6 +1,5 @@
 const _ = require('lodash');
 
-const AlphabetCounter = require("../utils/alphabet-counter");
 const StartNode = require('../graph/start-node');
 const EndNode = require('../graph/end-node');
 const SimpleNode = require('../graph/simple-node');
@@ -8,17 +7,13 @@ const DecisionNode = require('../graph/decision-node');
 const random = require('../utils/random');
 
 class GraphToFlow {
-  constructor() {
-    this.alphabetCounter = new AlphabetCounter()
-  }
+
   convert(inputGraph, randomLabel = false) {
-    // const ahbCounter = this.alphabetCounter;
     const graph = _.cloneDeep(inputGraph);
     let text = [];
     let hasLeft = [];
     let decisionNodeCount = 1;
     let statementNodeCount = 1;
-    // ahbCounter.reset();
 
     for (let i = 0; i < graph.length; i++) {
       graph[i]._id = i;
@@ -100,6 +95,23 @@ class GraphToFlow {
     }
 
     return text.join("\n");
+  }
+
+  cleanLabel(lang) {
+    const newLang = [] 
+    lang = lang.split("\n").map(t => t.trim()).filter(t => t.length);
+    for (let i in lang) {
+      var line = lang[i];
+      if (line.indexOf("condition:") !== -1 ||
+        line.indexOf("operation:") !== -1 ||
+        line.indexOf("start:") !== -1 ||
+        line.indexOf("end:") !== -1) {
+        line += '|blank'
+      }
+      newLang.push(line);
+    }
+
+    return newLang.join("\n");
   }
 }
 

@@ -22,19 +22,24 @@ async function generateSample() {
       const lang = langGenerator.generate(codeLong, codeDepth);
       const graph = graphBuilder.build(lang);
 
-      for(let j = 0; j < 20; j++) {
-        const flow = GraphToFlow.convert(graph, true);
+      for(let j = 0; j < 5; j++) {
+        const flow = GraphToFlow.convert(graph, randomLabel = true);
+        const flowWithBlankLabel = GraphToFlow.cleanLabel(flow);
         flowLang.push({
           index: sampleID + '-' + (j + 1),
           lang: flow
         });
+        flowLang.push({
+          index: sampleID + '-' + (j + 1) + '-blank',
+          lang: flowWithBlankLabel
+        })
       }
 
       fs.writeFile(__dirname + `/../data/sample-${sampleID}-lang.txt`, LangHelper.parse(lang), () => { });
       sampleID++;
     }
     
-    await FlowToImage.toImage(flowLang, writeFlow = true);
+    await FlowToImage.toImage(flowLang, writeFlow = false);
   }
 }
 
