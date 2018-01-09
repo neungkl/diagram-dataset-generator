@@ -12,17 +12,17 @@ const graphBuilder = new GraphBuilder();
 
 let sampleID = 1; 
 async function generateSample() {
-  while(sampleID <= 10) {
+  while(sampleID <= 10000) {
     const flowLang = [];
 
     console.log(`Sample at: ${sampleID}`);
     for (let i = 0; i < 5; i++) {
-      const codeLong = random.randRange(5,10);
-      const codeDepth = random.randRange(2,5);
+      const codeLong = random.randRange(3,6);
+      const codeDepth = random.randRange(1,3);
       const lang = langGenerator.generate(codeLong, codeDepth);
       const graph = graphBuilder.build(lang);
 
-      for(let j = 0; j < 5; j++) {
+      for(let j = 0; j < 15; j++) {
         const flow = GraphToFlow.convert(graph, randomLabel = true);
         const flowWithBlankLabel = GraphToFlow.cleanLabel(flow);
         flowLang.push({
