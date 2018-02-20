@@ -6,7 +6,7 @@ class FlowToImage {
   constructor() {
   }
 
-  async toImage(flowLang, writeFlow = false, threadSize = 16) {
+  async toImage(flowLang, writeFlowFile = false, threadSize = 16) {
 
     if (typeof flowLang === 'string') {
       flowLang = [flowLang];
@@ -44,20 +44,11 @@ class FlowToImage {
           const svgTag = await page.evaluate(body => body.innerHTML, diagramElm);
           
           if (!svgValidator.validate(svgTag)) {
-            // if (writeFlow) {
-            //   let flowDir = __dirname + `/../data/sample-${current+1}-flow-hide.txt`;
-            //   if (index) flowDir = __dirname + `/../data/sample-${index}-flow-hide.txt`;
-            //   fs.writeFile(flowDir, lang, () => { });
-            // }
-
-            // let picDir = __dirname + `/../data/sample-${current+1}-hide.jpg`;
-            // if (index) picDir = __dirname + `/../data/sample-${index}-hide.jpg`;
-
             await diagramElm.dispose();
             return resolve('reject');  
           }
 
-          if (writeFlow) {
+          if (writeFlowFile) {
             let flowDir = __dirname + `/../data/sample-${current+1}-flow.txt`;
             if (index) flowDir = __dirname + `/../data/sample-${index}-flow.txt`;
             fs.writeFile(flowDir, lang, () => { });

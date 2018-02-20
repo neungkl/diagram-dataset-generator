@@ -10,24 +10,36 @@ const fs = require('fs');
 const langGenerator = new LangGenerator();
 const graphBuilder = new GraphBuilder();
 
-let sampleID = 1; 
+const startSampleID = 1;
+const sampleSize = 4;
+const variationSize = 5;
+
+let sampleID = startSampleID;
 async function generateSample() {
-  while(sampleID <= 10000) {
+  while(sampleID <= sampleSize) {
     const flowLang = [];
 
     console.log(`Sample at: ${sampleID}`);
-    for (let i = 0; i < 5; i++) {
+    
+    for (let i = 0; i < 5 && i < sampleSize; i++) {
+      
       const codeLong = random.randRange(3,6);
       const codeDepth = random.randRange(1,3);
       const lang = langGenerator.generate(codeLong, codeDepth);
       const graph = graphBuilder.build(lang);
 
-      for(let j = 0; j < 15; j++) {
-        const flow = GraphToFlow.convert(graph, randomLabel = true);
-        const flowWithBlankLabel = GraphToFlow.cleanLabel(flow);
+      for(let j = 0; j < variationSize; j++) {
+        const flowOrigin = GraphToFlow.convert(
+          graph,
+          randomLabel = true,
+          blockVariation = true
+        );
+
+        const flowWithBlankLabel = GraphToFlow.cleanLabel(flowOrigin);
+
         flowLang.push({
           index: sampleID + '-' + (j + 1),
-          lang: flow
+          lang: flowOrigin
         });
         flowLang.push({
           index: sampleID + '-' + (j + 1) + '-blank',
@@ -39,7 +51,7 @@ async function generateSample() {
       sampleID++;
     }
     
-    await FlowToImage.toImage(flowLang, writeFlow = false);
+    await FlowToImage.toImage(flowLang, writeFlowFile = false);
   }
 }
 

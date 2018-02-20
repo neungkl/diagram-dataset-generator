@@ -8,7 +8,7 @@ const random = require('../utils/random');
 
 class GraphToFlow {
 
-  convert(inputGraph, randomLabel = false) {
+  convert(inputGraph, randomLabel = false, blockVariation = false) {
     const graph = _.cloneDeep(inputGraph);
     let text = [];
     let hasLeft = [];
@@ -47,7 +47,13 @@ class GraphToFlow {
       } else if (g instanceof EndNode) {
         text.push(`end=>end: ${label}`);
       } else if (g instanceof SimpleNode) {
-        text.push(`${label}=>operation: ${blockDesciption}`);
+        let blockName = 'operation';
+        if (blockVariation) {
+          blockName = ['operation', 'inputoutput', 'subroutine'][
+            parseInt(Math.random() * 3)
+          ]
+        }
+        text.push(`${label}=>${blockName}: ${blockDesciption}`);
       } else if (g instanceof DecisionNode) {
         text.push(`${label}=>condition: ${blockDesciption}`);
       }
@@ -102,6 +108,10 @@ class GraphToFlow {
     lang = lang.split("\n").map(t => t.trim()).filter(t => t.length);
     for (let i in lang) {
       var line = lang[i];
+
+      line = line.replace("inputoutput", "operation")
+      line = line.replace("subroutine", "operation")
+
       if (line.indexOf("condition:") !== -1 ||
         line.indexOf("operation:") !== -1 ||
         line.indexOf("start:") !== -1 ||
