@@ -2,67 +2,67 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const svgValidator = require('../validator/svg-validator');
 
+function generateBuilder(flowLang, current, size, page) {
+  return new Promise(async (resolve, reject) => {
+    const diagramElm = await page.$('#diagram');
+
+    console.log(`Generate ${current+1}/${size}`);
+
+    let lang = null;
+    let index = null;
+    if (typeof flowLang === 'string') {
+      lang = flowLang + '\n'
+    } else if (typeof flowLang === 'object') {
+      lang = flowLang.lang;
+      index = flowLang.index;
+    }
+    if (!lang) throw new Error(`Bad Behavior #5: Flow Language is not defined`);
+
+    const rect = await page.evaluate(lang => {
+      var elm = document.querySelector('#diagram');
+      elm.innerHTML = "";
+      var diagram = flowchart.parse(lang);
+      diagram.drawSVG('diagram', {
+        flowstate: {
+          blank: { 'font-color': 'white' }
+        }
+      });
+    }, lang);
+
+    const svgTag = await page.evaluate(body => body.innerHTML, diagramElm);
+    
+    if (!svgValidator.validate(svgTag)) {
+      await diagramElm.dispose();
+      return resolve('reject');  
+    }
+
+    if (writeFlowFile) {
+      let flowDir = __dirname + `/../data/sample-${current+1}-flow.txt`;
+      if (index) flowDir = __dirname + `/../data/sample-${index}-flow.txt`;
+      fs.writeFile(flowDir, lang, () => { });
+    }
+    
+    let picDir = __dirname + `/../data/sample-${current+1}.jpg`;
+    if (index) picDir = __dirname + `/../data/sample-${index}.jpg`;
+
+    await diagramElm.screenshot({ path: picDir, fullPage: false, type: 'jpeg' });
+    await diagramElm.dispose();
+
+    resolve('pass');
+  });
+}
+
 class FlowToImage {
   constructor() {
   }
 
-  async toImage(flowLang, writeFlowFile = false, threadSize = 16) {
+  async toImage(flowLang, writeFlowFile = false, threadSize = 8) {
 
     if (typeof flowLang === 'string') {
       flowLang = [flowLang];
     }
 
     await puppeteer.launch({ headless: true }).then(async browser => {
-
-      function generateBuilder(flowLang, current, size, page) {
-        return new Promise(async (resolve, reject) => {
-          const diagramElm = await page.$('#diagram');
-  
-          console.log(`Generate ${current+1}/${size}`);
-  
-          let lang = null;
-          let index = null;
-          if (typeof flowLang === 'string') {
-            lang = flowLang + '\n'
-          } else if (typeof flowLang === 'object') {
-            lang = flowLang.lang;
-            index = flowLang.index;
-          }
-          if (!lang) throw new Error(`Bad Behavior #5: Flow Language is not defined`);
-  
-          const rect = await page.evaluate(lang => {
-            var elm = document.querySelector('#diagram');
-            elm.innerHTML = "";
-            var diagram = flowchart.parse(lang);
-            diagram.drawSVG('diagram', {
-              flowstate: {
-                blank: { 'font-color': 'white' }
-              }
-            });
-          }, lang);
-  
-          const svgTag = await page.evaluate(body => body.innerHTML, diagramElm);
-          
-          if (!svgValidator.validate(svgTag)) {
-            await diagramElm.dispose();
-            return resolve('reject');  
-          }
-
-          if (writeFlowFile) {
-            let flowDir = __dirname + `/../data/sample-${current+1}-flow.txt`;
-            if (index) flowDir = __dirname + `/../data/sample-${index}-flow.txt`;
-            fs.writeFile(flowDir, lang, () => { });
-          }
-          
-          let picDir = __dirname + `/../data/sample-${current+1}.jpg`;
-          if (index) picDir = __dirname + `/../data/sample-${index}.jpg`;
-      
-          await diagramElm.screenshot({ path: picDir, fullPage: false, type: 'jpeg' });
-          await diagramElm.dispose();
-
-          resolve('pass');
-        });
-      }
 
       let builderPool = [];
       let pagePool = [];
