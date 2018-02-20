@@ -25,13 +25,17 @@ async function generateSample() {
       
       const codeLong = random.randRange(3,6);
       const codeDepth = random.randRange(1,3);
-      const lang = langGenerator.generate(codeLong, codeDepth);
+      const lang = langGenerator.generate(
+        codeLong,
+        codeDepth,
+        randomInfo = true
+      );
       const graph = graphBuilder.build(lang);
 
       for(let j = 0; j < variationSize; j++) {
         const flowOrigin = GraphToFlow.convert(
           graph,
-          randomLabel = true,
+          randomLabel = false,
           blockVariation = true
         );
 
@@ -47,7 +51,7 @@ async function generateSample() {
         })
       }
 
-      fs.writeFile(__dirname + `/../data/sample-${sampleID}-lang.txt`, LangHelper.parse(lang), () => { });
+      fs.writeFile(__dirname + `/../data/sample-${sampleID}-lang.txt`, LangHelper.parse(lang), () => {});
       sampleID++;
     }
     
