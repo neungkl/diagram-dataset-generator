@@ -2,44 +2,69 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const svgValidator = require('../validator/svg-validator');
 
+const renderGraph = flow => {
+  var elm = document.querySelector('#diagram');
+  elm.innerHTML = "";
+  var diagram = flowchart.parse(flow);
+  diagram.drawSVG('diagram', {
+    flowstate: {
+      blank: { 'font-color': 'white' }
+    }
+  });
+}
+
+const getWordPosition = () => {
+  var $text = $("text");
+  var words = [];
+  for (let i = 0; i < $text.length; i++) {
+    var text = $($text[i]).text();
+    if (text === 'start' ||
+      text === 'end' ||
+      text === 'yes' ||
+      text === 'no') continue;
+    words.push($($text[i]).text())
+  }
+  return words;
+}
+
 function generateBuilder(flowLang, current, size, page) {
   return new Promise(async (resolve, reject) => {
     const diagramElm = await page.$('#diagram');
 
     console.log(`Generate ${current+1}/${size}`);
 
-    let lang = null;
+    let flow = null;
     let index = null;
+    let lang = null;
     if (typeof flowLang === 'string') {
-      lang = flowLang + '\n'
+      flow = flowLang + '\n'
     } else if (typeof flowLang === 'object') {
+      flow = flowLang.flow;
       lang = flowLang.lang;
       index = flowLang.index;
     }
-    if (!lang) throw new Error(`Bad Behavior #5: Flow Language is not defined`);
 
-    const rect = await page.evaluate(lang => {
-      var elm = document.querySelector('#diagram');
-      elm.innerHTML = "";
-      var diagram = flowchart.parse(lang);
-      diagram.drawSVG('diagram', {
-        flowstate: {
-          blank: { 'font-color': 'white' }
-        }
-      });
-    }, lang);
+    if (!flow) throw new Error(`Bad Behavior #5: Flow Language is not defined`);
+
+    const rect = await page.evaluate(renderGraph, flow);
 
     const svgTag = await page.evaluate(body => body.innerHTML, diagramElm);
     
     if (!svgValidator.validate(svgTag)) {
       await diagramElm.dispose();
-      return resolve('reject');  
+      return resolve('reject');
     }
+
+    if (lang) {
+      const wordPosition = await page.evaluate(getWordPosition);
+      console.log(wordPosition);
+    }
+
 
     if (writeFlowFile) {
       let flowDir = __dirname + `/../data/sample-${current+1}-flow.txt`;
       if (index) flowDir = __dirname + `/../data/sample-${index}-flow.txt`;
-      fs.writeFile(flowDir, lang, () => { });
+      fs.writeFile(flowDir, flow, () => { });
     }
     
     let picDir = __dirname + `/../data/sample-${current+1}.jpg`;
@@ -52,17 +77,17 @@ function generateBuilder(flowLang, current, size, page) {
   });
 }
 
-class FlowToImage {
+class DatasetGenerator {
   constructor() {
   }
 
-  async toImage(flowLang, writeFlowFile = false, threadSize = 8) {
+  async generate(flowLang, writeFlowFile = false, threadSize = 8) {
 
     if (typeof flowLang === 'string') {
       flowLang = [flowLang];
     }
 
-    await puppeteer.launch({ headless: true }).then(async browser => {
+    await puppeteer.launch({ headless: false }).then(async browser => {
 
       let builderPool = [];
       let pagePool = [];
@@ -106,4 +131,4 @@ class FlowToImage {
 
 }
 
-module.exports = new FlowToImage();
+module.exports = new DatasetGenerator();
