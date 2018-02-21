@@ -36,6 +36,33 @@ const getWordPosition = () => {
   return words;
 }
 
+const generateBlockPosition = (blockPosition, lang) => {
+  const wordPosition = [];
+
+  for (let i = 0; i < lang.length; i++) {
+    let bType = lang[i].type;
+
+    if (bType === 'end') {
+      wordPosition.push(`end,-1,-1`);
+      continue;
+    }
+
+    let x, y;
+
+    for (let j = 0; j < blockPosition.length; j++) {
+      if (blockPosition[j].text === lang[i].info) {
+        x = blockPosition[j].x - 10;
+        y = blockPosition[j].y - 10;
+        break;
+      }
+    }
+
+    wordPosition.push(`${bType},${x},${y}`);
+  }
+
+  return wordPosition.join('\n');
+}
+
 function generateBuilder(flowLang, current, size, page) {
   return new Promise(async (resolve, reject) => {
     const diagramElm = await page.$('#diagram');
@@ -65,37 +92,16 @@ function generateBuilder(flowLang, current, size, page) {
       return resolve('reject');
     }
 
-    if (lang) {
+    if (lang && index.indexOf("blank") == -1) {
       const blockPosition = await page.evaluate(getWordPosition);
 
-      const wordPosition = [];
-
-      for (let i = 0; i < lang.length; i++) {
-        let bType = lang[i].type;
-
-        if (bType === 'end') {
-          wordPosition.push(`end,-1,-1`);
-          continue;
-        }
-
-        let x, y;
-
-        for (let j = 0; j < blockPosition.length; j++) {
-          if (blockPosition[j].text === lang[i].info) {
-            x = blockPosition[j].x - 10;
-            y = blockPosition[j].y - 10;
-            break;
-          }
-        }
-
-        wordPosition.push(`${bType},${x},${y}`);
-      }
+      const wordPosition = generateBlockPosition(blockPosition, lang);
 
       let blockPosDir = path.join(
         dataDir, 
         index ? `sample-${index}-block-pos.csv` : `sample-${current+1}-block-pos.csv`
       );
-      fs.writeFile(blockPosDir, wordPosition.join('\n'), () => {});
+      fs.writeFile(blockPosDir, wordPosition, () => {});
     }
 
     if (writeFlowFile) {

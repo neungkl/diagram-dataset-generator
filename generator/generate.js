@@ -11,8 +11,8 @@ const langGenerator = new LangGenerator();
 const graphBuilder = new GraphBuilder();
 
 const startSampleID = 1;
-const sampleSize = 4;
-const variationSize = 5;
+const sampleSize = 5;
+const variationSize = 15;
 
 let sampleID = startSampleID;
 async function generateSample() {
@@ -21,7 +21,7 @@ async function generateSample() {
 
     console.log(`Sample at: ${sampleID}`);
     
-    for (let i = 0; i < 5 && i < sampleSize; i++) {
+    for (let i = 0; i < variationSize && i < sampleSize; i++) {
       
       const codeLong = random.randRange(3,6);
       const codeDepth = random.randRange(1,3);
@@ -57,7 +57,8 @@ async function generateSample() {
       sampleID++;
     }
     
-    await DatasetGenerator.generate(rawData, writeFlowFile = false);
+    let tmp = await DatasetGenerator.generate(rawData, writeFlowFile = false);
+    console.log(tmp);
   }
 }
 
@@ -75,7 +76,7 @@ async function generateSingleSample() {
   );
   const graph = graphBuilder.build(lang);
 
-  for(let j = 0; j < 3; j++) {
+  for(let j = 0; j < 10; j++) {
     const flowOrigin = GraphToFlow.convert(
       graph,
       randomLabel = false,
@@ -100,4 +101,4 @@ async function generateSingleSample() {
   await DatasetGenerator.generate(rawData, writeFlowFile = false);
 }
 
-generateSingleSample();
+generateSample();
