@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const path = require('path');
 const svgValidator = require('../validator/svg-validator');
 
 const renderGraph = flow => {
@@ -22,7 +23,15 @@ const getWordPosition = () => {
       text === 'end' ||
       text === 'yes' ||
       text === 'no') continue;
-    words.push($($text[i]).text())
+    var elm = $text[i];
+    var text = $(elm).text();
+
+    var box = elm.getBoundingClientRect();
+    words.push({
+      x: box.x + box.width / 2,
+      y: box.y + box.height / 2,
+      text: text
+    });
   }
   return words;
 }
@@ -30,6 +39,7 @@ const getWordPosition = () => {
 function generateBuilder(flowLang, current, size, page) {
   return new Promise(async (resolve, reject) => {
     const diagramElm = await page.$('#diagram');
+    const dataDir = path.join(__dirname, '..', 'data');
 
     console.log(`Generate ${current+1}/${size}`);
 
@@ -49,26 +59,57 @@ function generateBuilder(flowLang, current, size, page) {
     const rect = await page.evaluate(renderGraph, flow);
 
     const svgTag = await page.evaluate(body => body.innerHTML, diagramElm);
-    
+
     if (!svgValidator.validate(svgTag)) {
       await diagramElm.dispose();
       return resolve('reject');
     }
 
     if (lang) {
-      const wordPosition = await page.evaluate(getWordPosition);
-      console.log(wordPosition);
+      const blockPosition = await page.evaluate(getWordPosition);
+
+      const wordPosition = [];
+
+      for (let i = 0; i < lang.length; i++) {
+        let bType = lang[i].type;
+
+        if (bType === 'end') {
+          wordPosition.push(`end,-1,-1`);
+          continue;
+        }
+
+        let x, y;
+
+        for (let j = 0; j < blockPosition.length; j++) {
+          if (blockPosition[j].text === lang[i].info) {
+            x = blockPosition[j].x;
+            y = blockPosition[j].y;
+            break;
+          }
+        }
+
+        wordPosition.push(`${bType},${x},${y}`);
+      }
+
+      let blockPosDir = path.join(
+        dataDir, 
+        index ? `sample-${index}-block-pos.csv` : `sample-${current+1}-block-pos.csv`
+      );
+      fs.writeFile(blockPosDir, wordPosition.join('\n'), () => {});
     }
 
-
     if (writeFlowFile) {
-      let flowDir = __dirname + `/../data/sample-${current+1}-flow.txt`;
-      if (index) flowDir = __dirname + `/../data/sample-${index}-flow.txt`;
+      let flowDir = path.join(
+        dataDir,
+        index ? `sample-${index}-flow.txt` : `sample-${current+1}-flow.txt`
+      );
       fs.writeFile(flowDir, flow, () => { });
     }
     
-    let picDir = __dirname + `/../data/sample-${current+1}.jpg`;
-    if (index) picDir = __dirname + `/../data/sample-${index}.jpg`;
+    let picDir = path.join(
+      dataDir,
+      index ? `sample-${index}.jpg` : `sample-${current+1}.jpg`
+    );
 
     await diagramElm.screenshot({ path: picDir, fullPage: false, type: 'jpeg' });
     await diagramElm.dispose();
@@ -87,7 +128,7 @@ class DatasetGenerator {
       flowLang = [flowLang];
     }
 
-    await puppeteer.launch({ headless: false }).then(async browser => {
+    await puppeteer.launch({ headless: true }).then(async browser => {
 
       let builderPool = [];
       let pagePool = [];
@@ -124,7 +165,7 @@ class DatasetGenerator {
         await pagePool[j].close();
       }
       
-      await browser.close();
+      await browser.close()
     });
 
   }

@@ -126,7 +126,7 @@ class SVGChecker {
       for (let j = 0; j < lines.length; j++) {
         if (boxs[i].type === 'rect') {
           // rect shape
-          if (boxs[i].collideWithLine(lines[j], 1)) return true;
+          if (boxs[i].collideWithLine(lines[j], 5)) return true;
           if (boxs[i].isNear(lines[j], 7)) return true;
         } else {
           // diamond shape
