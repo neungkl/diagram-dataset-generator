@@ -21,7 +21,7 @@ async function generateSample() {
 
     console.log(`Sample at: ${sampleID}`);
     
-    for (let i = 0; i < variationSize && i < sampleSize; i++) {
+    for (let i = 0; i < variationSize && i < sampleSize - startSampleID + 1; i++) {
       
       const codeLong = random.randRange(3,6);
       const codeDepth = random.randRange(1,3);

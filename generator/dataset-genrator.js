@@ -148,7 +148,10 @@ class DatasetGenerator {
         });
         page.setViewport({ width: 1280, height: 800 });
 
-        await page.goto(`file://${__dirname}/render-flow.html`);
+        await page.goto(`file://${__dirname}/render-flow/index.html`);
+        await page.evaluate(fs.readFileSync(path.join(__dirname, 'render-flow', 'rephael.js'), 'utf8'));
+        await page.evaluate(fs.readFileSync(path.join(__dirname, 'render-flow', 'flowchart.js'), 'utf8'));
+        await page.evaluate(fs.readFileSync(path.join(__dirname, 'render-flow', 'jquery-2.2.4.min.js'), 'utf8'));
         await page.waitForSelector('#finish');
 
         pagePool.push(page);
