@@ -57,8 +57,7 @@ async function generateSample() {
       sampleID++;
     }
     
-    let tmp = await DatasetGenerator.generate(rawData, writeFlowFile = false);
-    console.log(tmp);
+    await DatasetGenerator.generate(rawData, writeFlowFile = false);
   }
 }
 
