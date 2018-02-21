@@ -57,6 +57,8 @@ const generateBlockPosition = (blockPosition, lang) => {
       }
     }
 
+    if (bType === 'normal') bType = 'statement';
+
     wordPosition.push(`${bType},${x},${y}`);
   }
 
