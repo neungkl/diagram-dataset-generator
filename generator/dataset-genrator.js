@@ -82,8 +82,8 @@ function generateBuilder(flowLang, current, size, page) {
 
         for (let j = 0; j < blockPosition.length; j++) {
           if (blockPosition[j].text === lang[i].info) {
-            x = blockPosition[j].x;
-            y = blockPosition[j].y;
+            x = blockPosition[j].x - 10;
+            y = blockPosition[j].y - 10;
             break;
           }
         }
@@ -165,7 +165,7 @@ class DatasetGenerator {
         await pagePool[j].close();
       }
       
-      await browser.close()
+      await browser.close();
     });
 
   }
