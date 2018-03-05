@@ -99,7 +99,7 @@ function generateBuilder(flowLang, current, size, page) {
 
     const svgTag = await page.evaluate(body => body.innerHTML, diagramElm);
 
-    if (!svgValidator.validate(svgTag)) {
+    if (!svgValidator.validate(svgTag) && index.indexOf("blank") == -1) {
       await diagramElm.dispose();
       return resolve('reject');
     }
@@ -110,7 +110,7 @@ function generateBuilder(flowLang, current, size, page) {
       const wordPosition = generateBlockPosition(blockPosition, lang);
 
       let blockPosDir = path.join(
-        dataDir, 
+        dataDir,
         index ? `sample-${index}-block-pos.csv` : `sample-${current+1}-block-pos.csv`
       );
       fs.writeFile(blockPosDir, wordPosition, () => {});
@@ -123,7 +123,7 @@ function generateBuilder(flowLang, current, size, page) {
       );
       fs.writeFile(flowDir, flow, () => { });
     }
-    
+
     let picDir = path.join(
       dataDir,
       index ? `sample-${index}.jpg` : `sample-${current+1}.jpg`
@@ -185,7 +185,7 @@ class DatasetGenerator {
       for (let j = 0; j < threadSize; j++) {
         await pagePool[j].close();
       }
-      
+
       await browser.close();
     });
 
