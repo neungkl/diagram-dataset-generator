@@ -19,9 +19,7 @@ const getWordPosition = () => {
   var words = [];
   for (let i = 0; i < $text.length; i++) {
     var text = $($text[i]).text();
-    if (text === 'start' ||
-      text === 'end' ||
-      text === 'yes' ||
+    if (text === 'yes' ||
       text === 'no') continue;
     var elm = $text[i];
     var text = $(elm).text();
@@ -39,6 +37,15 @@ const getWordPosition = () => {
 const generateBlockPosition = (blockPosition, lang) => {
   const wordPosition = [];
 
+  lang.unshift({
+    type: '<START>',
+    info: '<START>'
+  });
+  lang.push({
+    type: '<END>',
+    info: '<END>'
+  });
+
   for (let i = 0; i < lang.length; i++) {
     let bType = lang[i].type;
 
@@ -50,7 +57,10 @@ const generateBlockPosition = (blockPosition, lang) => {
     let x, y;
 
     for (let j = 0; j < blockPosition.length; j++) {
-      if (blockPosition[j].text === lang[i].info) {
+      let blockText = blockPosition[j].text;
+      if (blockText === 'start') blockText = '<START>';
+      if (blockText === 'end') blockText = '<END>';
+      if (blockText === lang[i].info) {
         x = blockPosition[j].x - 10;
         y = blockPosition[j].y - 10;
         break;

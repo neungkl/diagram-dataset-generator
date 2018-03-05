@@ -12,7 +12,7 @@ const graphBuilder = new GraphBuilder();
 
 const startSampleID = 1;
 const sampleSize = 5;
-const variationSize = 15;
+const variationSize = 3;
 
 let sampleID = startSampleID;
 async function generateSample() {
