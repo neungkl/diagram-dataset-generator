@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 const svgValidator = require('../validator/svg-validator');
+const _ = require('lodash');
 
 const renderGraph = flow => {
   var elm = document.querySelector('#diagram');
@@ -34,8 +35,10 @@ const getWordPosition = () => {
   return words;
 }
 
-const generateBlockPosition = (blockPosition, lang) => {
+const generateBlockPosition = (blockPosition, rawLang) => {
   const wordPosition = [];
+
+  let lang = rawLang.slice();
 
   lang.unshift({
     type: '<START>',
